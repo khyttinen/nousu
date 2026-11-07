@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172b25">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nousu">
+  <meta name="description" content="Oma treenipäiväkirjasi. Kirjaa sarjat, seuraa kehitystä ja treenaa suunnitelmallisesti myös ilman verkkoyhteyttä.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Nousu – treenipäiväkirja</title>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#treeni"><span class="brand-icon"><svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span> nousu<span class="brand-dot">.</span></a><span class="local-status" id="save-status" role="status">● Vain tällä laitteella</span></header>
+  <main id="app"></main>
+  <nav class="bottom-nav" aria-label="Päänavigaatio">
+    <a href="#treeni" data-tab="treeni" aria-label="Treeni"><span>◫</span>Treeni</a>
+    <a href="#ohjelma" data-tab="ohjelma" aria-label="Ohjelma"><span>☷</span>Ohjelma</a>
+    <a href="#kehitys" data-tab="kehitys" aria-label="Kehitys"><span><svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span>Kehitys</a>
+    <a href="#asetukset" data-tab="asetukset" aria-label="Asetukset"><span><svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg></span>Asetukset</a>
+  </nav>
+  <dialog id="exercise-dialog"><form id="exercise-form"><div class="section-heading"><h2 id="dialog-title">Lisää liike</h2><button type="button" class="icon-button" id="close-dialog" aria-label="Sulje">×</button></div><input name="id" type="hidden"><label>Liikkeen nimi<input name="name" required maxlength="100"></label><label>Ryhmä<select name="group"><option>Perusliikkeet</option><option>Extra 1</option><option>Extra 2</option></select></label><div class="form-grid"><label>Sarjoja<input name="sets" type="number" min="1" max="12" required value="3"></label><label>Paino (kg)<input name="weight" type="number" min="0" max="2000" step="0.25" value="0" required></label><label>Toistot vähintään<input name="min" type="number" min="1" max="100" value="10" required></label><label>Toistot enintään<input name="max" type="number" min="1" max="100" value="12" required></label><label>Korotus (kg)<input name="step" type="number" min="0.25" max="100" step="0.25" value="2.5" required></label></div><label>Vastus tai muistiinpano<input name="note" maxlength="500" placeholder="Esim. sininen vastuskuminauha"></label><button class="button primary" type="submit">Tallenna liike</button></form></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

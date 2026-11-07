@@ -1,0 +1,1 @@
+{"name":"nousu","private":true,"type":"module","scripts":{"start":"python -m http.server 3000 --bind 0.0.0.0","test":"node --test --test-isolation=none tests/*.test.js"}}
