@@ -36,7 +36,7 @@ export function suggest(exercise,previous) {
  if(previous.effort==='hard' || sets.some(s=>s.reps<exercise.min)) return {weight,text:'Pidä paino ennallaan. Hae ensin tavoitetoistot hyvällä tekniikalla; tarvittaessa kevennä.',kind:'hold'};
  return {weight,text:`Pidä vastus ja lisää seuraavalla kerralla yksi toisto sarjaan, kun se tuntuu hallitulta. Korota vasta kaikkien ${exercise.sets} sarjan saavutettua ${exercise.max} toistoa ja jäädessä varaa.`,kind:'reps'};
 }
-export function makeDraft(exercises,sessions) { return {id:uid(),date:localDate(),note:'',exercises:exercises.map(e=>{const recommendation=suggest(e,latest(sessions,e.id));return {...e,effort:'normal',sets:Array.from({length:e.sets},()=>({weight:recommendation.weight,reps:e.min,done:false}))};})}; }
+export function makeDraft(exercises,sessions) { return {id:uid(),date:localDate(),note:'',exercises:exercises.map(e=>{const previous=latest(sessions,e.id);const recommendation=suggest(e,previous);return {...e,note:previous?previous.note:e.note,effort:'normal',sets:Array.from({length:e.sets},()=>({weight:recommendation.weight,reps:e.min,done:false}))};})}; }
 const finite=(v,min,max)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
 const text=(s,max)=>typeof s==='string'&&s.length<=max;
 const validSet=s=>s&&finite(s.weight,0,2000)&&finite(s.reps,1,100)&&Number.isInteger(s.reps)&&typeof s.done==='boolean';
