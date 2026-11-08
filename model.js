@@ -1,25 +1,25 @@
 export const KEY = 'nousu-data-v1';
 export const groups = ['Perusliikkeet', 'Extra 1', 'Extra 2'];
 const rows = [
- ['Ylätalja',4,10,12,50,'7.9.: 50 × 10 + 55 × 8 × 3'],
- ['Olkavarren kierto',3,12,12,0,'Sininen nauha · 7.9.: 3 × 12'],
- ['Rintaprässi',4,8,10,30,'7.9.: 25 × 10 + 30 × 8 × 3'],
- ['Selän ojennus',3,10,12,15,'7.9.: 3 × 12'],
- ['Jalkaprässi',4,10,12,160,'7.9.: 160 × 10 × 3'],
- ['Pohkeet',3,15,15,15,'Lähtöpaino 15–20 kg · 7.9.: 15 × 3'],
- ['Maastaveto',4,10,10,60,'7.9.: 60 × 10 × 4'],
- ['Pystypunnerrus',4,8,10,17.5,'7.9.: 17,5 × 10 × 2 + 17,5 × 8 × 2'],
- ['Alatalja',4,10,12,40,'7.9.: 40 × 10 + 45 × 8 × 2'],
- ['Polven ojennus',4,10,12,65,'7.9.: 65 × (12 + 10 × 3)'],
+ ['Ylätalja',4,10,12,50,''],
+ ['Olkavarren kierto',3,12,12,0,''],
+ ['Rintaprässi',4,8,10,30,''],
+ ['Selän ojennus',3,10,12,15,''],
+ ['Jalkaprässi',4,10,12,160,''],
+ ['Pohkeet',3,15,15,15,''],
+ ['Maastaveto',4,10,10,60,''],
+ ['Pystypunnerrus',4,8,10,17.5,''],
+ ['Alatalja',4,10,12,40,''],
+ ['Polven ojennus',4,10,12,65,''],
  ['Polven koukistus',3,10,12,50,''],
- ['Reiden loitonnus',3,10,12,65,'7.9.: 65 × 12 × 3'],
+ ['Reiden loitonnus',3,10,12,65,''],
  ['Vatsarutistus',3,15,15,45,''],
- ['Yläsoutu alataljassa',3,10,12,22.5,'7.9.: X',1],
- ['Face-pull ylätaljassa',3,10,12,20,'7.9.: X',1],
+ ['Yläsoutu alataljassa',3,10,12,22.5,'',1],
+ ['Face-pull ylätaljassa',3,10,12,20,'',1],
  ['Ojentajat ylätalja',3,10,12,17.5,'',1],
  ['Vinopenkki käsip. 45°',4,10,12,14,'',2],
  ['Hauis käsip.',3,10,12,14,'',2],
- ['Peck-deck',3,10,12,40,'7.9.: X',2]
+ ['Peck-deck',3,10,12,40,'',2]
 ];
 export const seed = () => ({ version:1, exercises:rows.map(([name,sets,min,max,weight,note,group=0],i)=>({id:`ex-${i}`,name,sets,min,max,weight,note,group:groups[group],step:weight>=100?5:2.5})), sessions:[], draft:null });
 export const uid = () => crypto.randomUUID();
