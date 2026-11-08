@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {seed,suggest,makeDraft,validate,latest} from '../model.js';
+import {seed,suggest,makeDraft,validate,latest,moveExercise} from '../model.js';
 test('all 19 original exercises and groups survive validation',()=>{const data=seed();assert.equal(data.exercises.length,19);assert.deepEqual([13,3,3],['Perusliikkeet','Extra 1','Extra 2'].map(g=>data.exercises.filter(e=>e.group===g).length));assert.equal(validate(JSON.parse(JSON.stringify(data))).version,1);});
 test('weight increases only with every target set at maximum and reserve',()=>{const e=seed().exercises[0];const previous={sets:Array.from({length:4},()=>({weight:50,reps:12,done:true})),effort:'easy'};assert.equal(suggest(e,previous).weight,52.5);assert.equal(suggest(e,{...previous,effort:'normal'}).weight,50);assert.equal(suggest(e,{...previous,sets:previous.sets.slice(1)}).weight,50);assert.equal(suggest(e,{...previous,effort:'hard'}).kind,'hold');assert.equal(suggest(e,{...previous,sets:[{weight:50,reps:8,done:true}]}).kind,'hold');});
 test('mixed weights cannot trigger increase and unchecked sets do not count',()=>{const e=seed().exercises[0],sets=[50,55,55,55].map(weight=>({weight,reps:12,done:true}));assert.notEqual(suggest(e,{sets,effort:'easy'}).kind,'increase');sets[0]={weight:55,reps:12,done:false};assert.notEqual(suggest(e,{sets,effort:'easy'}).kind,'increase');});
@@ -43,4 +43,43 @@ test('existing backup and in-progress notes round-trip without migration or new 
  assert.deepEqual(Object.keys(restored.draft.exercises[0]).sort(),Object.keys(data.sessions[0].exercises[0]).sort());
  restored.draft.exercises[0].note='x'.repeat(500);assert.equal(validate(restored),restored);
  restored.draft.exercises[0].note+='x';assert.throws(()=>validate(restored));
+});
+test('moves first, last and after a target from either direction without changing exercises',()=>{
+ const items=seed().exercises.slice(0,4),before=JSON.stringify(items);
+ const ids=items=>items.map(e=>e.id);
+ assert.deepEqual(ids(moveExercise(items,'ex-3','first')),['ex-3','ex-0','ex-1','ex-2']);
+ assert.deepEqual(ids(moveExercise(items,'ex-0','last')),['ex-1','ex-2','ex-3','ex-0']);
+ assert.deepEqual(ids(moveExercise(items,'ex-0','after:ex-2')),['ex-1','ex-2','ex-0','ex-3']);
+ assert.deepEqual(ids(moveExercise(items,'ex-3','after:ex-0')),['ex-0','ex-3','ex-1','ex-2']);
+ assert.deepEqual(ids(moveExercise(items,'ex-1','after:ex-0')),ids(items));
+ assert.equal(JSON.stringify(items),before);
+ for(const e of moveExercise(items,'ex-0','last'))assert.equal(e,items.find(x=>x.id===e.id));
+});
+test('program moves stay within their group even when group entries are interleaved',()=>{
+ const data=seed(),items=[data.exercises[0],data.exercises[13],data.exercises[1],data.exercises[16],data.exercises[2]],before=JSON.stringify(items);
+ const moved=moveExercise(items,'ex-2','first','Perusliikkeet');
+ assert.deepEqual(moved.map(e=>e.id),['ex-2','ex-13','ex-0','ex-16','ex-1']);
+ assert.equal(moved[1],items[1]);assert.equal(moved[3],items[3]);
+ assert.equal(moveExercise(items,'ex-0','after:ex-13','Perusliikkeet'),items);
+ assert.equal(JSON.stringify(items),before);
+});
+test('invalid destinations and missing or sole exercises leave the list intact',()=>{
+ const items=seed().exercises;
+ for(const destination of ['', 'bad','after:missing','after:ex-0'])assert.equal(moveExercise(items,'ex-0',destination),items);
+ assert.equal(moveExercise(items,'missing','first'),items);
+ const single=items.slice(0,1);assert.equal(moveExercise(single,'ex-0','last'),single);
+ const empty=[];assert.equal(moveExercise(empty,'ex-0','first'),empty);
+});
+test('reordering drafts preserves all records and exports while program moves affect only new drafts',()=>{
+ const data=seed();data.sessions=[makeDraft(data.exercises,[])];data.sessions[0].exercises[0].sets[0].done=true;
+ data.draft=makeDraft(data.exercises,data.sessions);data.draft.exercises[0].note='Oma teksti';data.draft.exercises[0].sets[0]={weight:52.5,reps:11,done:true};data.draft.exercises[0].effort='hard';
+ const history=JSON.stringify(data.sessions),draftBefore=JSON.stringify(data.draft),records=new Map(data.draft.exercises.map(e=>[e.id,JSON.stringify(e)]));
+ data.exercises=moveExercise(data.exercises,'ex-2','first','Perusliikkeet');
+ assert.equal(JSON.stringify(data.draft),draftBefore);
+ assert.equal(makeDraft(data.exercises,data.sessions).exercises[0].id,'ex-2');
+ data.draft.exercises=moveExercise(data.draft.exercises,'ex-0','last');
+ for(const e of data.draft.exercises)assert.equal(JSON.stringify(e),records.get(e.id));
+ assert.equal(JSON.stringify(data.sessions),history);
+ assert.deepEqual(validate(JSON.parse(JSON.stringify(data))),data);
+ assert.equal(latest(data.sessions,'ex-0').note,data.sessions[0].exercises[0].note);
 });
