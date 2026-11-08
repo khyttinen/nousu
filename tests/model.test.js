@@ -7,3 +7,40 @@ test('mixed weights cannot trigger increase and unchecked sets do not count',()=
 test('draft preserves snapshots and previous suggestions',()=>{const data=seed(),e=data.exercises[0];const draft=makeDraft([e],[]);data.draft=draft;assert.equal(validate(data),data);e.name='Changed';assert.equal(draft.exercises[0].name,'Ylätalja');assert.equal(draft.exercises[0].sets.length,4);assert.ok(draft.exercises[0].sets.every(s=>!s.done));});
 test('latest sorts by training date rather than insertion order',()=>{const e=seed().exercises[0],a=makeDraft([e],[]),b=makeDraft([e],[]);a.date='2026-09-10';b.date='2026-09-01';a.exercises[0].sets[0].done=b.exercises[0].sets[0].done=true;assert.equal(latest([a,b],e.id).date,a.date);});
 test('malformed imports are rejected before replacing stored data',()=>{for(const mutate of [d=>d.exercises[0].sets=0,d=>d.exercises[0].max=1,d=>d.exercises[0].weight=-1,d=>d.exercises.push({...d.exercises[0]}),d=>d.version=2,d=>d.draft={bad:true}]){const d=seed();mutate(d);assert.throws(()=>validate(d));}});
+test('notes come from the latest performed exercise, matched by id',()=>{
+ const data=seed(),e=data.exercises[0],older=makeDraft([e],[]),newer=makeDraft([e],[]);
+ older.date='2026-09-01';newer.date='2026-09-10';
+ older.exercises[0].note='Vanhempi teksti';newer.exercises[0].note='Penkki 3\nRauhallinen lasku';
+ older.exercises[0].sets[0].done=newer.exercises[0].sets[0].done=true;
+ const before=JSON.stringify([data,older,newer]);
+ const draft=makeDraft([{...e,name:'Uusi nimi'}],[newer,older]);
+ assert.equal(draft.exercises[0].note,'Penkki 3\nRauhallinen lasku');
+ draft.exercises[0].note='Tämän päivän muutos';
+ assert.equal(JSON.stringify([data,older,newer]),before);
+});
+test('blank previous notes stay blank and only a missing performance falls back to program',()=>{
+ const e=seed().exercises[0],session=makeDraft([e],[]);
+ assert.equal(session.exercises[0].note,e.note);
+ session.exercises[0].note='';session.exercises[0].sets[0].done=true;
+ assert.equal(makeDraft([e],[session]).exercises[0].note,'');
+ session.exercises[0].sets[0].done=false;
+ assert.equal(makeDraft([e],[session]).exercises[0].note,e.note);
+});
+test('same-day note selection uses save time',()=>{
+ const e=seed().exercises[0],a=makeDraft([e],[]),b=makeDraft([e],[]);
+ a.savedAt='2026-11-08T08:00:00Z';b.savedAt='2026-11-08T12:00:00Z';
+ a.exercises[0].note='Aamu';b.exercises[0].note='Ilta';
+ a.exercises[0].sets[0].done=b.exercises[0].sets[0].done=true;
+ assert.equal(makeDraft([e],[b,a]).exercises[0].note,'Ilta');
+});
+test('existing backup and in-progress notes round-trip without migration or new fields',()=>{
+ const data=seed();data.sessions=[makeDraft([data.exercises[0]],[])];
+ data.sessions[0].exercises[0].sets[0].done=true;
+ data.draft=makeDraft([data.exercises[0]],data.sessions);
+ data.draft.exercises[0].note='Luonnoksen oma teksti';
+ const serialized=JSON.stringify(data),restored=validate(JSON.parse(serialized));
+ assert.equal(JSON.stringify(restored),serialized);
+ assert.deepEqual(Object.keys(restored.draft.exercises[0]).sort(),Object.keys(data.sessions[0].exercises[0]).sort());
+ restored.draft.exercises[0].note='x'.repeat(500);assert.equal(validate(restored),restored);
+ restored.draft.exercises[0].note+='x';assert.throws(()=>validate(restored));
+});
