@@ -37,6 +37,24 @@ export function suggest(exercise,previous) {
  return {weight,text:`Pidä vastus ja lisää seuraavalla kerralla yksi toisto sarjaan, kun se tuntuu hallitulta. Korota vasta kaikkien ${exercise.sets} sarjan saavutettua ${exercise.max} toistoa ja jäädessä varaa.`,kind:'reps'};
 }
 export function makeDraft(exercises,sessions) { return {id:uid(),date:localDate(),note:'',exercises:exercises.map(e=>{const previous=latest(sessions,e.id);const recommendation=suggest(e,previous);return {...e,note:previous?previous.note:e.note,effort:'normal',sets:Array.from({length:e.sets},()=>({weight:recommendation.weight,reps:e.min,done:false}))};})}; }
+export function moveExercise(exercises,id,destination,group=null) {
+ const selected=group===null?exercises:exercises.filter(e=>e.group===group);
+ const from=selected.findIndex(e=>e.id===id);
+ if(from<0 || selected.length<2) return exercises;
+ const remaining=selected.filter(e=>e.id!==id);
+ let to;
+ if(destination==='first') to=0;
+ else if(destination==='last') to=remaining.length;
+ else if(destination.startsWith('after:')) {
+  const target=remaining.findIndex(e=>e.id===destination.slice(6));
+  if(target<0) return exercises;
+  to=target+1;
+ } else return exercises;
+ remaining.splice(to,0,selected[from]);
+ if(group===null) return remaining;
+ let index=0;
+ return exercises.map(e=>e.group===group?remaining[index++]:e);
+}
 const finite=(v,min,max)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
 const text=(s,max)=>typeof s==='string'&&s.length<=max;
 const validSet=s=>s&&finite(s.weight,0,2000)&&finite(s.reps,1,100)&&Number.isInteger(s.reps)&&typeof s.done==='boolean';

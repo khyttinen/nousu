@@ -3,3 +3,11 @@
 .inline-icon{width:1em;height:1em;vertical-align:-.12em;display:inline-block;flex-shrink:0}.brand-icon .inline-icon{width:24px;height:24px}.bottom-nav .inline-icon{width:23px;height:23px}.empty-icon .inline-icon{width:35px;height:35px}
 
 .exercise-note{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.move-control{display:flex;align-items:flex-end;gap:10px;margin-top:18px;min-width:0}
+.move-control label{flex:1;min-width:0;margin:0}
+.move-control select{min-width:0;text-overflow:ellipsis}
+.move-control .button{flex-shrink:0;min-height:46px;padding:12px 15px}
+.program-exercise{display:grid;grid-template-columns:36px minmax(0,1fr) auto}
+.program-exercise>.move-control{grid-column:2 / -1;margin-top:0}
+@media(max-width:600px){.program-exercise{grid-template-columns:29px minmax(0,1fr) auto}.program-exercise>.move-control{grid-column:1 / -1}}
