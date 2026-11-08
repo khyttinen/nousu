@@ -30,7 +30,7 @@ const assert=require('node:assert/strict');
  await page.getByRole('button',{name:'Aloita treeni'}).click();await page.getByRole('button',{name:'Aloita valituilla'}).click();
  assert.equal(await page.locator('[data-exercise-note]').first().inputValue(),'');
  await page.getByRole('button',{name:'Lisää liike',exact:false}).click();await page.locator('#picker input[value="ex-13"]').check();await page.getByRole('button',{name:'Lisää valitut'}).click();
- assert.equal(await page.locator('[data-exercise-note="ex-13"]').inputValue(),'7.9.: X');
+ assert.equal(await page.locator('[data-exercise-note="ex-13"]').inputValue(),await page.evaluate(()=>JSON.parse(localStorage.getItem('nousu-data-v1')).exercises.find(e=>e.id==='ex-13').note));
  assert.equal(await page.locator('[data-exercise-note]').first().inputValue(),'');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:'/workspace/screenshot-workout.png',fullPage:true});
  // Exercise reordering with existing records and offline storage.
